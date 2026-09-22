@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Como são calculadas as métricas do dashboard Esteira da Receita Operacional.">
+  <title>Métricas · Esteira da Receita Operacional</title>
+  <style>
+    :root{--ink:#eceeee;--muted:#878c8d;--line:#202223;--paper:#0b0c0d;--soft:#121415;--silver:#b9bfc0;--silver-dim:#707677;--green:#72d17a;--green-bg:#12261a;--red:#ff7777;--red-bg:#2a1719;--shadow:0 18px 48px #0000005c}
+    *{box-sizing:border-box} body{margin:0;background:#050606;color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}body:before{content:"";position:fixed;inset:-30% -10% auto;height:520px;background:radial-gradient(ellipse at 50% 0,#ffffff08,transparent 68%);pointer-events:none;animation:ambient 8s ease-in-out infinite alternate}
+    .shell{max-width:1180px;margin:auto;padding:28px 28px 54px;position:relative}.top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:22px;border-bottom:1px solid var(--line);animation:rise .65s both}
+    .brand{display:flex;align-items:center;gap:14px}.logo{width:68px;height:58px;object-fit:contain;border-radius:10px;mix-blend-mode:screen;animation:markPulse 4s ease-in-out infinite}.brand h1{margin:2px 0 0;font-size:22px;letter-spacing:-.03em}
+    .intro{display:flex;justify-content:space-between;align-items:end;gap:24px;padding:36px 0 24px;animation:rise .65s .08s both}.intro h2{margin:0 0 7px;font-size:30px;letter-spacing:-.045em}.intro p{margin:0;color:var(--muted);max-width:650px}.search{width:260px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:#0c0d0e;outline:0;color:var(--ink);box-shadow:0 2px 5px #00000028}.search::placeholder{color:#707677}.search:focus{border-color:#8f9899;box-shadow:0 0 0 3px #c7cccd1c}
+    .hero{margin-bottom:28px;animation:rise .65s .16s both}.panel{background:linear-gradient(120deg,#151718,#0d0e0f);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px}.panel h3{margin:0 0 6px;font-size:16px}.panel p{margin:0;color:var(--muted)}.logic{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:15px}.tag{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:9px;background:var(--soft);font-size:12px;font-weight:700}.tag.green{background:var(--green-bg);color:var(--green)}.tag.red{background:var(--red-bg);color:var(--red)}.arrow{color:#8d9494}.market-definition{display:flex;gap:10px;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);color:#aeb3b4;font-size:12px}.market-definition strong{color:var(--silver);font-size:11px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+    .compare-note{display:flex;gap:14px;align-items:flex-start;margin:0 0 28px;padding:17px 20px;background:#0e1011;border:1px solid var(--line);border-left:3px solid var(--silver);border-radius:0 14px 14px 0;animation:rise .65s .2s both}.compare-note strong{display:block;margin-bottom:3px;font-size:14px}.compare-note p{margin:0;color:#aeb3b4;font-size:13px}.compare-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.compare-tags span{padding:5px 8px;border:1px solid #303435;border-radius:7px;color:#9da3a4;font-size:11px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 13px}.section-title h3{margin:0;font-size:17px}.count{font-size:12px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.metric{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px;transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease;animation:cardIn .6s both}.metric:nth-child(1){animation-delay:.23s}.metric:nth-child(2){animation-delay:.28s}.metric:nth-child(3){animation-delay:.33s}.metric:nth-child(4){animation-delay:.38s}.metric:nth-child(5){animation-delay:.43s}.metric:nth-child(6){animation-delay:.48s}.metric:nth-child(7){animation-delay:.53s}.metric:nth-child(8){animation-delay:.58s}.metric:hover{border-color:#6c7273;box-shadow:0 12px 28px #00000066;transform:translateY(-3px)}.metric[hidden]{display:none}.metric-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.icon{width:31px;height:31px;border-radius:10px;background:#191b1c;color:var(--silver);display:grid;place-items:center;font-weight:800;font-size:12px}.metric h4{margin:0;font-size:16px}.metric .sub{color:var(--muted);font-size:12px;margin-top:2px}.formula{margin:16px 0 13px;padding:11px 12px;border-radius:10px;background:#121415;color:#bec3c4;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:auto}.formula b{color:var(--silver);font-weight:700}.metric-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--muted);font-size:12px}.source{color:#707677}.detail{border:0;background:none;color:var(--silver);font:inherit;font-weight:700;cursor:pointer;padding:0}.detail:hover{text-decoration:underline}.detail-box{display:none;color:var(--muted);font-size:12px;border-top:1px solid var(--line);margin-top:14px;padding-top:13px}.metric.open .detail-box{display:block;animation:detailIn .3s both}
+    .wide{grid-column:span 2}.wide .formula{white-space:normal}.note{margin-top:28px;padding:17px 19px;border-left:3px solid var(--silver);background:#121314;border-radius:0 12px 12px 0;animation:rise .6s .65s both}.note strong{display:block;margin-bottom:3px}.note p{margin:0;color:#aeb3b4;font-size:13px}.footer{padding-top:24px;margin-top:30px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:16px}
+    .simulator{margin-top:34px;padding:22px;background:#090a0b;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);animation:rise .6s .7s both}.sim-head{display:flex;justify-content:space-between;gap:20px;align-items:start}.sim-head h3{margin:0 0 4px;font-size:18px}.sim-head p{margin:0;color:var(--muted);font-size:13px}.presets{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.preset,.state-btn{border:1px solid #292c2d;border-radius:8px;padding:7px 9px;background:#111314;color:#bec3c4;font:12px inherit;cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .2s}.preset:hover,.state-btn:hover{border-color:#7d8384;color:#fff;transform:translateY(-1px)}.preset.active{border-color:var(--silver);background:#bfc4c5;color:#101112}.sim-layout{display:grid;grid-template-columns:1fr 1.05fr;gap:16px;margin-top:19px}.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.sim-control{padding:12px;border:1px solid #202223;border-radius:12px;background:#0e1011}.sim-label{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px;font-weight:700;font-size:12px}.sim-status{font-weight:700;color:var(--silver-dim);font-size:11px}.sim-control[data-state="up"] .sim-status,.sim-control[data-state="very-up"] .sim-status{color:var(--green)}.sim-control[data-state="down"] .sim-status,.sim-control[data-state="very-down"] .sim-status{color:var(--red)}.state-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.state-btn{padding:6px 3px;font-size:10px;color:var(--muted)}.state-btn.active{background:#242728;border-color:#9ea4a5;color:#fff}.sim-control[data-state="up"] .state-btn.active,.sim-control[data-state="very-up"] .state-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green)}.sim-control[data-state="down"] .state-btn.active,.sim-control[data-state="very-down"] .state-btn.active{background:var(--red-bg);border-color:var(--red);color:var(--red)}.sim-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sim-card{min-height:92px;padding:12px;border:1px solid #292c2d;border-radius:12px;background:#101112;transition:border-color .25s,box-shadow .25s,transform .25s}.sim-card.active{transform:translateY(-2px);box-shadow:0 10px 18px #00000055}.sim-card.is-up,.sim-card.is-very-up{border-color:var(--green);box-shadow:0 0 0 1px #72d17a22}.sim-card.is-down,.sim-card.is-very-down{border-color:var(--red);box-shadow:0 0 0 1px #ff777722}.sim-card.is-neutral{border-color:#525758}.sim-card strong{display:block;font-size:12px}.sim-card .sim-value{display:block;margin-top:8px;color:var(--silver);font-size:13px;font-weight:800}.sim-card.is-up .sim-value,.sim-card.is-very-up .sim-value{color:var(--green)}.sim-card.is-down .sim-value,.sim-card.is-very-down .sim-value{color:var(--red)}.insight{grid-column:1/-1;margin-top:2px;padding:16px;border:1px solid #292c2d;border-radius:12px;background:#121415}.insight-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--silver-dim);font-weight:800}.insight h4{margin:5px 0 3px;font-size:16px}.insight p{margin:0;color:#b0b5b6;font-size:13px}.insight-meta{margin-top:10px;color:#83898a;font-size:11px}.recommendation{display:flex;gap:8px;align-items:baseline;margin-top:13px;padding-top:12px;border-top:1px solid #282b2c;color:#c4c9c9;font-size:13px}.recommendation strong{color:var(--silver);font-size:11px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.insight.is-good{border-color:var(--green)}.insight.is-risk{border-color:var(--red)}
+    @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes detailIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}@keyframes ambient{from{opacity:.65;transform:translate3d(-1%,0,0)}to{opacity:1;transform:translate3d(1%,8px,0)}}@keyframes markPulse{0%,100%{filter:drop-shadow(0 0 0 #ffffff00)}50%{filter:drop-shadow(0 0 10px #ffffff22)}}
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+    @media(max-width:800px){.shell{padding:20px 16px 40px}.top,.intro,.sim-head{align-items:flex-start;flex-direction:column}.intro h2{font-size:26px}.search{width:100%}.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.sim-layout{grid-template-columns:1fr}.presets{justify-content:flex-start}.simulator{padding:16px}}
+    @media(max-width:500px){.controls,.sim-cards{grid-template-columns:1fr 1fr}.sim-card{min-height:82px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand"><img class="logo" src="logo-revenue-branca.png" alt="Revenue"><div><h1>Esteira da Receita Operacional</h1></div></div>
+    </header>
+
+    <section class="intro">
+      <div><h2>Métricas do dashboard</h2><p>Cálculos, comparações e regras visuais.</p></div>
+      <input class="search" id="search" type="search" placeholder="Buscar métrica…" aria-label="Buscar métrica">
+    </section>
+
+    <section class="hero" aria-label="Resumo da lógica">
+      <div class="panel"><h3>Regra geral</h3><p>Realizado − Orçado. Verde = meta atingida. Vermelho = abaixo da meta.</p><div class="logic"><span class="tag">Realizado</span><span class="arrow">−</span><span class="tag">Orçado</span><span class="arrow">→</span><span class="tag green">Acima</span><span class="tag red">Abaixo</span></div><div class="market-definition"><strong>Mercado</strong><span>grupo de linhas da mesma relação. Ex.: o mercado São Paulo × Rio pode reunir várias linhas.</span></div></div>
+    </section>
+
+    <section class="compare-note" aria-label="Orientação de comparação histórica">
+      <div><strong>Compare antes de concluir</strong><p>Analise todos os indicadores no mês passado, no mesmo mês do ano passado e no acumulado do ano. Assim você identifica se a baixa ou a alta é pontual ou se já virou tendência.</p><div class="compare-tags"><span>Mês anterior</span><span>Mesmo mês do ano passado</span><span>Acumulado do ano</span><span>Mercado</span><span>Linha</span><span>Classe</span><span>Setor</span><span>Empresa</span></div></div>
+    </section>
+
+    <div class="section-title"><h3>Métricas principais</h3><span class="count" id="count">8 métricas</span></div>
+    <section class="grid" id="metrics">
+      <article class="metric" data-search="receita operacional receita realizado orçado faturamento"><div class="metric-top"><div><h4>Receita operacional</h4><div class="sub">Total arrecadado</div></div><div class="icon">R$</div></div><div class="formula"><b>Receita realizada</b> = SUM(Receita Realizada)</div><div class="metric-foot"><span class="source">Fato Financeiro Vendas</span><button class="detail">O que significa?</button></div><div class="detail-box">É todo o dinheiro gerado pelas passagens no período. Acima da meta = arrecadamos mais; abaixo = arrecadamos menos.</div></article>
+      <article class="metric" data-search="passageiros pax volume"><div class="metric-top"><div><h4>Passageiros</h4><div class="sub">Pessoas transportadas</div></div><div class="icon">PAX</div></div><div class="formula"><b>Passageiros</b> = SUM(Passageiros)</div><div class="metric-foot"><span class="source">Volume de clientes</span><button class="detail">O que significa?</button></div><div class="detail-box">É o volume de pessoas transportadas. Acima da meta = mais demanda; abaixo = menos pessoas usando o serviço.</div></article>
+      <article class="metric" data-search="ticket médio tm preço tarifa receita passageiro"><div class="metric-top"><div><h4>Ticket médio</h4><div class="sub">Valor médio pago por pessoa</div></div><div class="icon">TM</div></div><div class="formula"><b>Ticket médio</b> = Receita realizada ÷ Passageiros</div><div class="metric-foot"><span class="source">Receita / PAX</span><button class="detail">O que significa?</button></div><div class="detail-box">Mostra quanto cada passageiro pagou, em média. Alto pode aumentar a receita, mas, se os passageiros caem, pode indicar preço afastando a demanda. Baixo com volume alto pode significar preço barato demais e receita diluída.</div></article>
+      <article class="metric" data-search="iap ocupação aproveitamento passageiros percentual"><div class="metric-top"><div><h4>IAP (ocupação)</h4><div class="sub">Quanto da capacidade foi ocupada</div></div><div class="icon">%</div></div><div class="formula"><b>Variação IAP</b> = (IAP realizado − IAP orçado) ÷ IAP orçado</div><div class="metric-foot"><span class="source">Ocupação</span><button class="detail">O que significa?</button></div><div class="detail-box">É a proporção de lugares ocupados nos veículos. Alto = operação mais cheia; baixo = lugares vazios e menor aproveitamento da oferta.</div></article>
+      <article class="metric" data-search="km quilometragem distância operação eficiência"><div class="metric-top"><div><h4>KM rodado</h4><div class="sub">Distância percorrida</div></div><div class="icon">KM</div></div><div class="formula"><b>Diferença KM</b> = KM realizado − KM orçado</div><div class="metric-foot"><span class="source">Operação x orçamento</span><button class="detail">O que significa?</button></div><div class="detail-box">Mede quanto a operação se deslocou. KM abaixo da meta pode ser excelente quando receita, passageiros e eficiência continuam acima: entregamos o resultado com menos custo operacional.</div></article>
+      <article class="metric" data-search="r$ km receita quilômetro eficiência"><div class="metric-top"><div><h4>R$ / KM</h4><div class="sub">Receita por quilômetro</div></div><div class="icon">R/K</div></div><div class="formula"><b>R$ / KM</b> = Receita realizada ÷ KM realizado</div><div class="metric-foot"><span class="source">Eficiência da rota</span><button class="detail">O que significa?</button></div><div class="detail-box">Indica quanto dinheiro é gerado a cada quilômetro rodado. Alto = cada quilômetro está produzindo mais receita.</div></article>
+      <article class="metric" data-search="viagens realizadas operação frota quantidade"><div class="metric-top"><div><h4>Viagens realizadas</h4><div class="sub">Viagens executadas</div></div><div class="icon">VIA</div></div><div class="formula"><b>Diferença viagens</b> = Viagens realizadas − Viagens orçadas</div><div class="metric-foot"><span class="source">Operação x orçamento</span><button class="detail">O que significa?</button></div><div class="detail-box">Mostra quantas viagens foram feitas. Menos viagens pode ser bom quando a demanda e a receita foram mantidas com menor custo.</div></article>
+      <article class="metric wide" data-search="impacto tm volume receita decomposição ponte waterfall"><div class="metric-top"><div><h4>Impactos na receita</h4><div class="sub">O que puxou o resultado</div></div><div class="icon">ΔR$</div></div><div class="formula"><b>Impacto TM</b> = (TM realizado − TM orçado) × Passageiros realizados<br><b>Impacto volume</b> = Receita orçada × variação de volume</div><div class="metric-foot"><span class="source">Ponte de receita</span><button class="detail">O que significa?</button></div><div class="detail-box">Separa o efeito do preço médio e o efeito da quantidade de passageiros. Assim fica claro se a receita mudou por cobrar mais ou por transportar mais pessoas.</div></article>
+    </section>
+
+    <section class="simulator" id="simulator" aria-labelledby="sim-title">
+      <div class="sim-head">
+        <div><h3 id="sim-title">Simule os cards</h3><p>Imagine o resultado de um mercado e ajuste cada indicador.</p></div>
+        <div class="presets" aria-label="Cenários prontos">
+          <button class="preset active" data-preset="neutral">Zerar</button>
+          <button class="preset" data-preset="ticket-risk">Preço alto</button>
+          <button class="preset" data-preset="volume-risk">Volume alto</button>
+          <button class="preset" data-preset="km-excellent">Economia de KM</button>
+          <button class="preset" data-preset="operational-excess">Esforço alto</button>
+        </div>
+      </div>
+      <div class="sim-layout">
+        <div class="controls" aria-label="Controles dos indicadores">
+          <div class="sim-control" data-key="passengers" data-state="neutral"><div class="sim-label"><span>Passageiros</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+          <div class="sim-control" data-key="ticket" data-state="neutral"><div class="sim-label"><span>Ticket médio</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+          <div class="sim-control" data-key="iap" data-state="neutral"><div class="sim-label"><span>IAP / ocupação</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+          <div class="sim-control" data-key="km" data-state="neutral"><div class="sim-label"><span>KM rodado</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+          <div class="sim-control" data-key="rpkm" data-state="neutral"><div class="sim-label"><span>R$ / KM</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+          <div class="sim-control" data-key="trips" data-state="neutral"><div class="sim-label"><span>Viagens</span><span class="sim-status">Na meta</span></div><div class="state-buttons"><button class="state-btn" title="Muito abaixo" data-state="very-down">↓↓</button><button class="state-btn" title="Abaixo" data-state="down">↓</button><button class="state-btn active" title="Na meta" data-state="neutral">Meta</button><button class="state-btn" title="Acima" data-state="up">↑</button><button class="state-btn" title="Muito acima" data-state="very-up">↑↑</button></div></div>
+        </div>
+        <div class="sim-cards" aria-label="Cards simulados">
+          <div class="sim-card is-neutral" data-card="passengers"><strong>Passageiros</strong><span class="sim-value">Na meta</span></div>
+          <div class="sim-card is-neutral" data-card="ticket"><strong>Ticket médio</strong><span class="sim-value">Na meta</span></div>
+          <div class="sim-card is-neutral" data-card="iap"><strong>IAP</strong><span class="sim-value">Na meta</span></div>
+          <div class="sim-card is-neutral" data-card="km"><strong>KM</strong><span class="sim-value">Na meta</span></div>
+          <div class="sim-card is-neutral" data-card="rpkm"><strong>R$ / KM</strong><span class="sim-value">Na meta</span></div>
+          <div class="sim-card is-neutral" data-card="trips"><strong>Viagens</strong><span class="sim-value">Na meta</span></div>
+        </div>
+        <div class="insight" id="insight"><div class="insight-label">Leitura</div><h4>Todos os indicadores estão na meta.</h4><p>Use os cenários acima ou ajuste os cards para entender a combinação.</p><div class="insight-meta" id="insight-meta">Receita implícita: na meta · Demanda: na meta · Esforço: na meta</div><div class="recommendation" id="recommendation"><strong>Sugestão</strong><span>Eu sugiro comparar este cenário com o mês anterior, o mesmo mês do ano passado e o acumulado do ano antes de tomar uma decisão.</span></div></div>
+      </div>
+    </section>
+
+    <aside class="note"><strong>Regra especial: super-eficiência operacional</strong><p>Se KM ou viagens ficam abaixo do orçamento, mas a receita realizada atinge a meta e passageiros ou ticket médio também atingem a meta, o indicador recebe borda verde. A leitura é: mesma ou maior receita com menor esforço operacional.</p></aside>
+    <footer class="footer"><span>Os valores acompanham os filtros do dashboard.</span><span>Criado por Gabriel Loiola</span></footer>
+  </main>
+  <script>
+    const search = document.querySelector('#search');
+    const cards = [...document.querySelectorAll('.metric')];
+    const count = document.querySelector('#count');
+    search.addEventListener('input', () => { const term = search.value.trim().toLowerCase(); let visible = 0; cards.forEach(card => { const show = !term || card.dataset.search.includes(term) || card.innerText.toLowerCase().includes(term); card.hidden = !show; if(show) visible++; }); count.textContent = `${visible} ${visible === 1 ? 'métrica' : 'métricas'}`; });
+    document.querySelectorAll('.detail').forEach(button => button.addEventListener('click', () => { const card = button.closest('.metric'); const open = card.classList.toggle('open'); button.textContent = open ? 'Ocultar explicação' : 'O que significa?'; }));
+
+    const statusNames = {'very-down':'Muito abaixo', down:'Abaixo', neutral:'Na meta', up:'Acima', 'very-up':'Muito acima'};
+    const statusScore = {'very-down':-2, down:-1, neutral:0, up:1, 'very-up':2};
+    const presets = {
+      neutral: {passengers:'neutral', ticket:'neutral', iap:'neutral', km:'neutral', rpkm:'neutral', trips:'neutral'},
+      'ticket-risk': {passengers:'very-down', ticket:'very-up', iap:'down', km:'down', rpkm:'down', trips:'down'},
+      'volume-risk': {passengers:'very-up', ticket:'very-down', iap:'down', km:'down', rpkm:'down', trips:'down'},
+      'km-excellent': {passengers:'very-up', ticket:'up', iap:'up', km:'very-down', rpkm:'very-up', trips:'up'},
+      'operational-excess': {passengers:'down', ticket:'down', iap:'down', km:'very-up', rpkm:'very-down', trips:'very-up'}
+    };
+    const state = {...presets.neutral};
+    const controls = [...document.querySelectorAll('.sim-control')];
+    const insight = document.querySelector('#insight');
+
+    function setState(key, next) {
+      state[key] = next;
+      const control = document.querySelector(`.sim-control[data-key="${key}"]`);
+      control.dataset.state = next;
+      control.querySelector('.sim-status').textContent = statusNames[next];
+      control.querySelectorAll('.state-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.state === next));
+      const card = document.querySelector(`.sim-card[data-card="${key}"]`);
+      card.className = `sim-card is-${next}`;
+      card.querySelector('.sim-value').textContent = statusNames[next];
+      document.querySelectorAll('.preset').forEach(btn => btn.classList.remove('active'));
+      updateInsight();
+    }
+
+    function setPreset(name) {
+      Object.entries(presets[name]).forEach(([key, value]) => { state[key] = value; const control = document.querySelector(`.sim-control[data-key="${key}"]`); control.dataset.state = value; control.querySelector('.sim-status').textContent = statusNames[value]; control.querySelectorAll('.state-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.state === value)); const card = document.querySelector(`.sim-card[data-card="${key}"]`); card.className = `sim-card is-${value}`; card.querySelector('.sim-value').textContent = statusNames[value]; });
+      document.querySelectorAll('.preset').forEach(btn => btn.classList.toggle('active', btn.dataset.preset === name));
+      updateInsight();
+    }
+
+    function updateInsight() {
+      const all = Object.values(state);
+      const score = key => statusScore[state[key]];
+      const revenueScore = score('passengers') + score('ticket');
+      const demandScore = score('passengers') + score('iap');
+      const effortScore = score('km') + score('trips');
+      let title = 'Combinação mista';
+      let body = 'Alguns indicadores estão acima e outros abaixo da meta. Observe preço, volume e esforço operacional juntos no mercado analisado.';
+      let suggestion = 'Eu sugiro testar uma variável por vez e comparar o resultado deste mercado com o mês anterior, o mesmo mês do ano passado e o acumulado do ano.';
+      let kind = '';
+      if (score('ticket') >= 1 && score('passengers') <= -1 && score('iap') <= 0) {
+        title = 'O preço pode estar afastando passageiros';
+        body = 'O ticket médio subiu bastante, mas o volume e a ocupação caíram. A passagem pode estar cara demais para parte da demanda deste mercado.';
+        suggestion = 'Eu sugiro testar uma redução pequena e controlada do preço neste mercado ou em uma classe. Veja se os passageiros e o IAP reagem sem comprometer a receita.';
+        kind = 'is-risk';
+      } else if (score('passengers') >= 1 && score('ticket') <= -1 && score('iap') <= 0) {
+        title = revenueScore <= 0 ? 'Volume alto, mas receita diluída' : 'Volume compensa parte do preço baixo';
+        body = revenueScore <= 0 ? 'Mais passageiros estão sendo transportados neste mercado, porém o ticket médio está muito baixo e a receita pode estar diluída. Podemos estar cobrando barato demais.' : 'O volume cresceu o suficiente para compensar parte da queda do ticket, mas a margem por passageiro neste mercado merece atenção.';
+        suggestion = revenueScore <= 0 ? 'Eu sugiro testar um reajuste gradual ou diferenciado neste mercado. A ideia é recuperar receita sem perder o volume conquistado.' : 'Eu sugiro acompanhar a margem por passageiro antes de reduzir ainda mais o preço neste mercado para buscar volume.';
+        kind = 'is-risk';
+      } else if (score('km') <= -1 && score('passengers') >= 1 && score('ticket') >= 1 && score('iap') >= 1 && score('rpkm') >= 1 && score('trips') >= 1) {
+        title = 'Super-eficiência operacional';
+        body = 'Neste mercado, batemos as metas com menos KM rodado. Entregamos mais resultado usando menos esforço e custo operacional.';
+        suggestion = 'Eu sugiro preservar essa configuração e investigar quais linhas, horários ou classes dentro deste mercado estão permitindo esse resultado com menos KM.';
+        kind = 'is-good';
+      } else if (score('km') >= 1 && score('trips') >= 1 && score('rpkm') <= -1) {
+        title = 'Esforço alto com baixo retorno';
+        body = 'Neste mercado, estamos rodando mais e realizando mais viagens, mas gerando pouca receita por KM. Há sinal de desperdício operacional.';
+        suggestion = 'Eu sugiro revisar as linhas, horários e a oferta antes de aumentar a operação. Talvez seja possível reduzir KM ou viagens sem perder demanda.';
+        kind = 'is-risk';
+      } else if (score('trips') >= 1 && score('passengers') <= -1) {
+        title = 'Oferta maior que a demanda';
+        body = 'Este mercado está realizando mais viagens, mas transportando menos passageiros. Parte da oferta pode estar circulando vazia.';
+        suggestion = 'Eu sugiro olhar linha a linha dentro do mercado e testar ajustes de frequência ou horário antes de manter toda essa oferta.';
+        kind = 'is-risk';
+      } else if (score('trips') <= -1 && score('passengers') >= 1 && score('iap') >= 1) {
+        title = 'Mais passageiros com menos viagens';
+        body = 'A demanda e a ocupação subiram neste mercado mesmo com menos viagens. A operação está concentrando melhor os passageiros.';
+        suggestion = 'Eu sugiro avaliar se essa concentração pode ser mantida sem prejudicar frequência, horários importantes ou a experiência do cliente neste mercado.';
+        kind = 'is-good';
+      } else if (score('trips') <= -1 && score('passengers') <= -1) {
+        title = 'Menos viagens e menos demanda';
+        body = 'A redução da operação veio acompanhada de queda de passageiros neste mercado. É importante separar economia real de perda de serviço.';
+        suggestion = 'Eu sugiro investigar primeiro as linhas e horários mais afetados deste mercado. Pode ser necessário recuperar frequência ou ajustar o preço.';
+        kind = 'is-risk';
+      } else if (score('iap') >= 1 && score('passengers') <= -1) {
+        title = 'Ocupação percentual alta, mas pouco volume';
+        body = 'As linhas deste mercado estão mais cheias proporcionalmente, porém o total de passageiros caiu. Pode haver uma operação menor ou concentrada.';
+        suggestion = 'Eu sugiro olhar o número absoluto de passageiros junto com a ocupação. Um veículo cheio não compensa sozinho uma perda grande de volume neste mercado.';
+        kind = '';
+      } else if (score('iap') <= -1 && score('passengers') >= 1) {
+        title = 'Mais passageiros, mas capacidade sobrando';
+        body = 'O volume cresceu neste mercado, porém a ocupação caiu. Pode haver oferta ou capacidade acima da demanda.';
+        suggestion = 'Eu sugiro revisar o tamanho dos veículos e a distribuição das linhas. Talvez seja possível atender os passageiros deste mercado com uma oferta mais ajustada.';
+        kind = '';
+      } else if (score('rpkm') >= 1 && score('passengers') >= 1 && score('ticket') <= 0) {
+        title = 'Mercado competitivo com ganho de volume';
+        body = 'Este mercado está atraindo passageiros e gerando boa receita por KM mesmo com um ticket controlado. O volume parece estar compensando o preço.';
+        suggestion = 'Eu sugiro acompanhar se esse ganho de volume continua saudável e se a margem permanece suficiente para sustentar a estratégia.';
+        kind = 'is-good';
+      } else if (all.every(value => value === 'up' || value === 'very-up')) {
+        title = 'Resultado acima da meta';
+        body = 'Preço, volume, ocupação e operação deste mercado estão melhores que o planejado.';
+        suggestion = 'Eu sugiro entender o que impulsionou esse resultado e verificar se ele se repete nas principais linhas e em outros mercados antes de ampliar a estratégia.';
+        kind = 'is-good';
+      } else if (all.every(value => value === 'down' || value === 'very-down')) {
+        title = 'Operação abaixo das metas';
+        body = 'Preço, volume, ocupação e esforço operacional estão abaixo do planejado neste mercado. É preciso investigar a causa.';
+        suggestion = 'Eu sugiro começar pelas linhas com maior queda dentro deste mercado e separar o problema entre preço, demanda e operação. Assim a ação fica mais precisa.';
+        kind = 'is-risk';
+      } else if (score('km') <= -1 && score('rpkm') >= 1) {
+        title = 'Boa eficiência por quilômetro';
+        body = 'Este mercado está rodando menos KM e gerando mais receita por quilômetro. É um sinal positivo de eficiência.';
+        suggestion = 'Eu sugiro identificar quais linhas geram essa produtividade e testar se o mesmo padrão pode ser aplicado em outros mercados.';
+        kind = 'is-good';
+      }
+      insight.className = `insight ${kind}`;
+      insight.querySelector('h4').textContent = title;
+      insight.querySelector('p').textContent = body;
+      insight.querySelector('#recommendation span').textContent = suggestion;
+      const revenueText = revenueScore >= 2 ? 'acima' : revenueScore <= -2 ? 'abaixo' : 'próxima da meta';
+      const demandText = demandScore >= 2 ? 'forte' : demandScore <= -2 ? 'fraca' : 'mista';
+      const effortText = effortScore <= -2 ? 'baixo' : effortScore >= 2 ? 'alto' : 'próximo da meta';
+      document.querySelector('#insight-meta').textContent = `Receita implícita: ${revenueText} · Demanda: ${demandText} · Esforço: ${effortText}`;
+    }
+
+    controls.forEach(control => control.querySelectorAll('.state-btn').forEach(button => button.addEventListener('click', () => setState(control.dataset.key, button.dataset.state))));
+    document.querySelectorAll('.preset').forEach(button => button.addEventListener('click', () => setPreset(button.dataset.preset)));
+  </script>
+</body>
+</html>
